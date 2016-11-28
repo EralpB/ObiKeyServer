@@ -15,7 +15,7 @@ var encrypted_info = {}
 app.post('/listen/:listenId', function (req, res) {
   console.log("incoming post");
   var listenId = req.params['listenId'];
-  if(!listenId.match(/^[0-9a-z]{50,}$/)){
+  if(!listenId.match(/^[0-9a-z]{20,}$/)){
 
      res.json({success: false});
      return;
@@ -38,7 +38,7 @@ app.post('/listen/:listenId', function (req, res) {
 app.get('/listen/:listenId', function(req, res){
     console.log("incoming get id");
     var listenId = req.params['listenId'];
-    if(!listenId.match(/^[0-9a-z]{50,}$/)){
+    if(!listenId.match(/^[0-9a-z]{20,}$/)){
         res.json({success: false, error: "Invalid listenId"});
         return;
     }
