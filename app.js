@@ -16,7 +16,6 @@ app.post('/listen/:listenId', function (req, res) {
   console.log("incoming post");
   var listenId = req.params['listenId'];
   if(!listenId.match(/^[0-9a-z]{20,}$/)){
-
      res.json({success: false});
      return;
   }
@@ -29,9 +28,11 @@ app.post('/listen/:listenId', function (req, res) {
   console.log(req.body);
   console.log(req.query);
   var encrypted_string = req.body.enc;
+  var ctr = req.body.ctr;
+  var hmac = req.body.hmac;
   //var buffer = new Buffer(req.body.enc.data);
-  messageBus.emit(listenId, encrypted_string);
-  encrypted_info[listenId] = {created: new Date(), encrypted_info: encrypted_string }
+  messageBus.emit(listenId, {encrypted_info: encrypted_string, ctr: ctr, hmac: hmac});
+  encrypted_info[listenId] = {created: new Date(), encrypted_info: encrypted_string, ctr: ctr, hmac: hmac}
   res.json({success: true});
 })
 
@@ -45,12 +46,14 @@ app.get('/listen/:listenId', function(req, res){
     console.log("getting a id:"+listenId);
     if(listenId in encrypted_info){
         var info = encrypted_info[listenId]['encrypted_info'];
-        res.json({success: true, encrypted_info:info});
+        var ctr = encrypted_info[listenId]['ctr'];
+        var hmac = encrypted_info[listenId]['hmac'];
+        res.json({success: true, encrypted_info:info, ctr: ctr, hmac: hmac});
         return;
     }
     var addMessageListener = function(res, listenId){
         messageBus.once(listenId, function(data){
-            res.json({success: true, encrypted_info:data});
+            res.json({success: true, encrypted_info:data.encrypted_info, ctr: data.ctr, hmac: data.hmac});
         })
     }
     addMessageListener(res, listenId);
